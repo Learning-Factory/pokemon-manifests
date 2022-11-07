@@ -1,0 +1,9 @@
+secretGenerator:
+- name: mysql-pass
+  literals:
+  - password=Control123
+resources:
+  - dh-secret.yaml
+  - mysql-deployment.yaml
+  - pokemon-deployment.yaml
+  - pokemon-ingress-traefik.yaml

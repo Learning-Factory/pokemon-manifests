@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pokemon
+  labels:
+    app: pokemon
+spec:
+  ports:
+    - port: 80
+      targetPort: 9090
+  selector:
+    app: pokemon
+    tier: frontend
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pk-pv-claim
+  labels:
+    app: pokemon
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pokemon
+  labels:
+    app: pokemon
+spec:
+  selector:
+    matchLabels:
+      app: pokemon
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: pokemon
+        tier: frontend
+    spec:
+      containers:
+      - image: ffactory/pokemondemo:latest
+        name: pokemon
+        env:
+        - name: CONN_STR
+          value: jdbc:mysql://pokemon-mysql:3306
+        - name: DB_USER
+          value: sa
+        - name: DB_NAME
+          value: pokemon
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        - name: APP_PORT
+          value: "9090"
+        ports:
+        - containerPort: 9090
+          name: pokemon
+        volumeMounts:
+        - name: pokemon-persistent-storage
+          mountPath: /var/www/html
+      imagePullSecrets:
+      - name: regcred
+      volumes:
+      - name: pokemon-persistent-storage
+        persistentVolumeClaim:
+          claimName: pk-pv-claim

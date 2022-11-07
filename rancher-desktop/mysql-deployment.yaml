@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pokemon-mysql
+  labels:
+    app: pokemon
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+  selector:
+    app: pokemon
+    tier: mysql
+  # clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: pokemon
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pokemon-mysql
+  labels:
+    app: pokemon
+spec:
+  selector:
+    matchLabels:
+      app: pokemon
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: pokemon
+        tier: mysql
+    spec:
+      containers:
+      - image: mysql:8
+        name: mysql
+        env:
+        - name: MYSQL_DATABASE
+          value: pokemon
+        - name: MYSQL_USER
+          value: sa
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
