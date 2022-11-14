@@ -3,7 +3,7 @@ secretGenerator:
   literals:
   - password=Control123
 resources:
-  - dh-secret.yaml
+  - sealed-secret.yaml
   - mysql-deployment.yaml
   - pokemon-deployment.yaml
-  - pokemon-ingress-traefik.yaml
+  - pokemon-ingress-nginx.yaml

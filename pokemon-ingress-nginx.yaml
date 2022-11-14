@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pokemon-ingress
+spec:
+  rules:
+  # - host: pokemon.192.168.1.10.nip.io
+  - host: pokemon.factory-labs.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pokemon
+            port:
+              number: 80
+  ingressClassName: nginx
