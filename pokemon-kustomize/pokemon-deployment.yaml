@@ -46,7 +46,7 @@ spec:
         tier: frontend
     spec:
       containers:
-      - image: ffactory/pokemondemo:latest
+      - image: ffactory/pokemondemo:a4459c92
         name: pokemon
         env:
         - name: CONN_STR
